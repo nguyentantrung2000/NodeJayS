@@ -2,10 +2,10 @@
 
 const app = require("./src/app");
 
-const port = 1113;
+const PORT = process.env.PORT || 3056;
 
-const server = app.listen(port, () => {
-    console.log(`Server NodeJayH running on port ${port}`);
+const server = app.listen(PORT, () => {
+    console.log(`Server NodeJayH running on port ${PORT}`);
 });
 
 process.on("SIGINT", ()=>{
