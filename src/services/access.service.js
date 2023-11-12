@@ -3,6 +3,9 @@
 const shopModel = require("../models/shop.model")
 const bycrypt = require('bcrypt')
 const crypto = require('crypto')
+const KeyTokenService = require("./keyToken.service")
+const { createTokenPair } = require("../auth/authUtils")
+const { getInfoData } = require("../utils")
 const RoleShop = {
     SHOP: 'SHOP',
     WRITER: 'WRITER',
@@ -21,7 +24,7 @@ class AccessService{
             }
         }
         const passwordHash = await bycrypt.hash(password, 10)
-        const newShop = await shopModel.created({
+        const newShop = await shopModel.create({
             name,
             email, 
             password: passwordHash, 
@@ -31,8 +34,45 @@ class AccessService{
             // created privateKey, publicKey
             const {privateKey, publicKey} = crypto.generateKeyPairSync('rsa',{
                 modulusLength: 4096,
+                publicKeyEncoding:{
+                    type: 'pkcs1',
+                    format: 'pem',
+                },
+                privateKeyEncoding: {
+                    type: 'pkcs1',
+                    format: 'pem',
+                }
             })
-            // console.log({privateKey, publicKey}) save collection keyStore
+            // public key crypto standards
+            console.log({privateKey, publicKey}) 
+
+            const publicKeyString = await KeyTokenService.createKeyToken({
+                userId: newShop._id,
+                publicKey,
+            })
+
+            if(!publicKeyString){
+                return {
+                    code: 'xxxx',
+                    message: 'publicKeyString Error',
+                }
+            }
+            const publicKeyObject = crypto.createPublicKey(publicKeyString)
+            // ceeate token pair
+            const tokens = await createTokenPair({ userId: newShop._id, email }, publicKeyString, privateKey)
+            console.log(`Created Token Success:::`, tokens)
+
+            return {
+                code: 201,
+                metadata:{
+                    shop: getInfoData({ fileds: ['_id', 'name', 'email', 'roles'], object: newShop}),
+                    tokens,
+                }
+            }
+        }
+        return {
+            code: 200,
+            metadata: null
         }
     }catch(err){
         return {

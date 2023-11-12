@@ -1,0 +1,1 @@
+{ name: 'Shop JayS', email: 'shopjays@gmail.com', password: '123456' }

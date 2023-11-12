@@ -3,7 +3,8 @@
 const mongoose = require('mongoose');
 const { db: {host, name, port} } = require('../config/config.mongodb')
 const { countConnect } = require('../helpers/check.connect');
-const connectString = `mongodb://${host}:${port}/${name}`
+// const connectString = `mongodb://${host}:${port}/${name}`
+const connectString = `mongodb+srv://trungtan0:lPXRWMDyvijP9seE@nodejayh.v9bvg84.mongodb.net/?retryWrites=true&w=majority`
 
 
 console.log(connectString)
@@ -16,12 +17,7 @@ class Database{
             mongoose.set('debug', true);
             mongoose.set('debug', { color: true })
         }
-        mongoose.connect(connectString,{
-            maxPoolSize: 50
-        }).then(_ => {
-            console.log(`Connected to MongoDB Success new Write`, countConnect())
-        })
-        .catch(err => console.log(`Connect to MongoDB Fail`));
+        mongoose.connect(connectString).then(_ => console.log('connect mongodb success PRO')).catch(err => console.log(err));
     }
     static getInstance(){
         if(!Database.instance){
